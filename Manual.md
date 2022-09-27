@@ -24,11 +24,11 @@ Step 1. Cloning repositories
 Clone files in your preferred local repositories (each of them needs separate  repository) by entering this commands in Terminal:
 
 ```
-git clone https://github.com/whym9/receiving_service.git
+...:~ git clone https://github.com/whym9/receiving_service.git
 
-git clone https://github.com/whym9/pcap_statistics.git
+...:~ git clone https://github.com/whym9/pcap_statistics.git
 
-git clone https://github.com/whym9/saving_service.git
+...:~ git clone https://github.com/whym9/saving_service.git
 
 ```
 
@@ -38,10 +38,15 @@ Start building docker images subsequentially. Go to each services' repository to
 
 ```
 ...:~ cd receiving_service
+
 .../receiving_service:~ sudo docker build -t receiver . 
+
 .../receiving_service:~ cd ../pcap_statistics
+
 .../pcap_statistics:~ sudo docker build -t statistics . 
+
 .../pcap_statistics:~ cd ../saving_service
+
 .../saving_service:~ sudo docker build -t saver . 
 ```
 
@@ -56,10 +61,15 @@ We use the command -pd to run the image in a detached mode and give it some para
 
 ```
 ...:~ cd receiving_service
+
 .../receiving_service:~ sudo docker run --env-file .env -pd 8080:8080 receiver 
+
 .../receiving_service:~ cd ../pcap_statistics
+
 .../pcap_statistics:~ sudo docker run --env-file .env -pd 6006:6006 receiver
+
 .../pcap_statistics:~ cd ../saving_service
+
 .../saving_service:~ sudo docker run --env-file .env -pd 5005:5005 receiver
 ```
 
@@ -75,7 +85,7 @@ You can do it by:
 ![image](https://user-images.githubusercontent.com/104463020/192141599-58df7c58-0b59-4d7d-8a9c-11b820ad9d9c.png)
 2. Similarly, make a curl request. For  example 
 ```
-curl -v -F uploadFile=lo.pcapng -F upload=@lo.pcapng http://localhost:8080
+...:~ curl -v -F uploadFile=lo.pcapng -F upload=@lo.pcapng http://localhost:8080
 ```
 
 where there is a lo.pcapng value you need to give the name of your file (or the directory for the second case). and at the end the address you are running the receiving_service on.
