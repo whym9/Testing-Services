@@ -34,41 +34,36 @@ git clone https://github.com/whym9/saving_service.git
 
 Step 2. Building Docker Images
 
-Start building docker images subsequentially. Go to each services' repository to locate the Dockerfile and run these commands:
+Start building docker images subsequentially. Go to each services' repository to locate the Dockerfile and run it: 
 
 ```
-.../receiving_service:~ sudo docker build -t my-app . 
-
+...:~ cd receiving_service
+.../receiving_service:~ sudo docker build -t receiver . 
+.../receiving_service:~ cd ../pcap_statistics
+.../pcap_statistics:~ sudo docker build -t statistics . 
+.../pcap_statistics:~ cd ../saving_service
+.../saving_service:~ sudo docker build -t saver . 
 ```
 
-Same with other services. my-app parameter is the name of the image. You can call images how you want to.
+Step 4. Adding environment variables
 
-Step 4. Creating .env files
-
-Create a file in each of your cloned repositories with .env extension. 
-In this file you need to declare environmental variables by writing to it in this format:
-```
-VAR_NAME1=VAR_VALUE1
-VAR_NAME=VAR_VALUE2
-...
-```
-(Have to be in all caps!)
-
-List of environmental valriable names for server adresses and additional values. (all of them are strings)
-List of environmental variables for receiving_service: HTTP_RECEIVER, GRPC_SENDER, PROMETHEUS_ADDRESS. (all are addresses)
-List of environmental variables for pcap_statistics: GRPC_RECEIVER, GRPC_SENDER, PROMETHEUS_ADDRESS (addresses) and DIR (directory).
-List of environmental variables for saving_service: GRPC_SENDER, PROMETHEUS_ADDRESS (addresses) and DIR, DSN (directory and DSN for MySQL).
+In this repository there are .env files that have environment vatiables listed there. Download them and place in the repository you use.
 
 
 Step 5. Running docker images as containers 
 
-We use the command -pd to run the image in a detached mode and give it some parameters of host_port:docker_port to connect your host port to docker's. For example:
+We use the command -pd to run the image in a detached mode and give it some parameters of host_port:docker_port to connect your host port to docker's. --env-file parameter tells the container to take as environment the .env file. Go to the inital directory and run:
 
 ```
-sudo docker run -pd 8000:80 image-name
+...:~ cd receiving_service
+.../receiving_service:~ sudo docker run --env-file .env -pd 8080:8080 receiver 
+.../receiving_service:~ cd ../pcap_statistics
+.../pcap_statistics:~ sudo docker run --env-file .env -pd 6006:6006 receiver
+.../pcap_statistics:~ cd ../saving_service
+.../saving_service:~ sudo docker run --env-file .env -pd 5005:5005 receiver
 ```
 
-8000:80 part means that the host port 8000 should be connected to docker port 80.
+8080:8080 part means that the host port 8080 should be connected to docker port 8080.
 
 Step 6. Testing
 
@@ -78,16 +73,17 @@ Now all services are running in a detached mode and are connected with each othe
 You can do it by:
 1. making a POST request through POSTMAN to the port you specified; the request should have a form with key - uploadFile and a value of some pcap file. 
 ![image](https://user-images.githubusercontent.com/104463020/192141599-58df7c58-0b59-4d7d-8a9c-11b820ad9d9c.png)
-3. Similarly, make a curl request. For  example 
+2. Similarly, make a curl request. For  example 
 ```
 curl -v -F uploadFile=lo.pcapng -F upload=@lo.pcapng http://localhost:8080
 ```
 
 where there is a lo.pcapng value you need to give the name of your file (or the directory for the second case). and at the end the address you are running the receiving_service on.
 
-5. Or runnin a client service like client.go that was given in this repository in client folder by doing:
+3. Or runnin a client service like client.go that was given in this repository in client folder by doing:
+
 ```
-go run client.go
+...:~ go run client.go
 ```
 
 Step 7. Possible answers
