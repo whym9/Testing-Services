@@ -4,24 +4,24 @@ Consists of services: receiving_service, pcap_statistics, saving_service
 
 ## Receiving Service (receiving_service)
 
-Receiving Service uses HTTP server to accept data and send them further by GRPC. HTTP server only accepts POST requests with form name "uploadFile" and value as a file. Since the system as a whole is made for working with pcap files, you need to send them to this only pcap files.
-It needs HTTP, GRPC addresses and adress for the server that collects metrics given by Prometheus. For that it needs environmetnal varibales set and instructions for that are in the step-by-step instructions section below. 
+Receiving Service uses HTTP server to accept files and a GRPC client to send them over to Pcap Statistics. HTTP server only accepts POST requests with form name "uploadFile" and value as a file. Since the system as a whole is made for working with pcap files, you need to send only pcap files.
+It needs HTTP, GRPC addresses and adress for the Prometheus metrics. For that it needs environmetnal varibales, instruction for which are given in a section below. 
 
 ## Pcap Statistics (pcap_statistics)
 
-Pcap Statistics accepts data and sends them over both by GRPC server and client. Before sending data further it needs to process it and make some statistics. This functionality is made explicitly for pcap files. So it is required to send only pcap files to this service.
-Similar to Receiving Service needs to get GRPC server and client addresses and Metrics address from environmental variables.
+Pcap Statistics accepts pcap files by a GRPC server and sends them to Saving Service by a GRPC client. Before sending pcap files further it needs to process it and make statistics about: TCP, UDP, IPv4, IPv6 protocols. 
+GRPC server of this service needs to get the same address as a GRPC client of previous service. GRPC client and address for metrics should be different. We provide those addresses through environmental variables.
 
 ## Saving Service (saving_service)
 
-It accepts the data through GRPC server and saves them in the Database. Since all of the services are connected, this service gets data from Pcap Statistics, which are statistics and the files itself (exactly in this order). It saves data into MySQL db.
-It also needs GRPC server address and Metrics address from environmental variables. Additionally, directory and dsn for saving data.
+Saving Service accepts the data through GRPC server and saves them in the file system and the Database. It gets data from Pcap Statistics, which are statistics and the files itself (exactly in this order). It saves data into MySQL db.
+It also needs GRPC server address (same as Pcap Statistics GRPC client) and Metrics address from environmental variables. Additionally, a directory and a mysql dsn for saving data.
 
 ## Step-by-step Instructions
 
 Step 1. Cloning repositories
 
-Clone files in your preferred local repositories (each of them needs separate  repository) by entering this commands in Terminal:
+Clone files in your preferred local repository by entering this commands in Terminal:
 
 ```
 ...:~$ git clone https://github.com/whym9/receiving_service.git
