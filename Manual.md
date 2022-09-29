@@ -24,11 +24,11 @@ Step 1. Cloning repositories
 Clone files in your preferred local repositories (each of them needs separate  repository) by entering this commands in Terminal:
 
 ```
-...:~ git clone https://github.com/whym9/receiving_service.git
+...:~$ git clone https://github.com/whym9/receiving_service.git
 
-...:~ git clone https://github.com/whym9/pcap_statistics.git
+...:~$ git clone https://github.com/whym9/pcap_statistics.git
 
-...:~ git clone https://github.com/whym9/saving_service.git
+...:~$ git clone https://github.com/whym9/saving_service.git
 
 ```
 
@@ -37,22 +37,54 @@ Step 2. Building Docker Images
 Start building docker images subsequentially. Go to each services' repository to locate the Dockerfile and run it: 
 
 ```
-...:~ cd receiving_service
+...:~$ cd receiving_service
 
-.../receiving_service:~ sudo docker build -t receiver . 
+.../receiving_service:~$ sudo docker build -t receiver . 
 
-.../receiving_service:~ cd ../pcap_statistics
+.../receiving_service:~$ cd ../pcap_statistics
 
-.../pcap_statistics:~ sudo docker build -t statistics . 
+.../pcap_statistics:~$ sudo docker build -t statistics . 
 
-.../pcap_statistics:~ cd ../saving_service
+.../pcap_statistics:~$ cd ../saving_service
 
-.../saving_service:~ sudo docker build -t saver . 
+.../saving_service:~$ sudo docker build -t saver . 
 ```
 
-Step 4. Adding environment variables
+Step 3. Adding environment variables
 
 In this repository there are .env files that have environment vatiables listed there. Download them and place in the repository you use.
+
+Step 4. Setting up MySQL container
+
+This service uses MySQL server to save data into database. Therefore, we will use the MySQL image and run it and use it as the db server for our service to use. Execute following commands:
+
+```
+...:-$ sudo docker run -e MYSQL_ROOT_PASSWORD=123 --name=mys -p 127.0.0.1:3307:3306 -d mysql
+```
+It will pull mysql for you if you don't have it locally. parameter --name names the container so we can use that name later to refer to the container. 
+Then you need to create a database and table in it. 
+
+```
+...:-$ sudo docker exec -it mys mysql -uroot -p123
+```
+This command will open mysql terminal in it we need to write:
+
+```
+mysql> CREATE DATABASE pcap_files;
+
+mysql> USE pcap_files;
+
+mysql> CREATE TABLE File_Statistics (
+    -> ID INT NOT NULL,
+    -> FilePath VARCHAR(256),
+    -> ProtocolTCP INT,
+    -> UDP INT,
+    -> IPv4 INT,
+    -> IPv6 INT,
+    -> PRIMARY KEY (ID)
+    -> );
+```
+
 
 
 Step 5. Running docker images as containers 
@@ -60,17 +92,17 @@ Step 5. Running docker images as containers
 We use the command -pd to run the image in a detached mode and give it some parameters of host_port:docker_port to connect your host port to docker's. --env-file parameter tells the container to take as environment the .env file. Go to the inital directory and run:
 
 ```
-...:~ cd receiving_service
+...:~$ cd receiving_service
 
-.../receiving_service:~ sudo docker run --env-file .env -pd 8080:8080 receiver 
+.../receiving_service:~$ sudo docker run --name=rec --env-file .env -pd 8080:8080 receiver 
 
-.../receiving_service:~ cd ../pcap_statistics
+.../receiving_service:~$ cd ../pcap_statistics
 
-.../pcap_statistics:~ sudo docker run --env-file .env -pd 6006:6006 receiver
+.../pcap_statistics:~ sudo docker run --name=stat --env-file .env -pd 6006:6006 receiver
 
-.../pcap_statistics:~ cd ../saving_service
+.../pcap_statistics:~$ cd ../saving_service
 
-.../saving_service:~ sudo docker run --env-file .env -pd 5005:5005 receiver
+.../saving_service:~$ sudo docker run --name=save --env-file .env -pd 5005:5005 receiver
 ```
 
 8080:8080 part means that the host port 8080 should be connected to docker port 8080.
@@ -85,7 +117,7 @@ You can do it by:
 ![image](https://user-images.githubusercontent.com/104463020/192141599-58df7c58-0b59-4d7d-8a9c-11b820ad9d9c.png)
 2. Similarly, make a curl request. For  example 
 ```
-...:~ curl -v -F uploadFile=lo.pcapng -F upload=@lo.pcapng http://localhost:8080
+...:~$ curl -v -F uploadFile=lo.pcapng -F upload=@lo.pcapng http://localhost:8080
 ```
 
 where there is a lo.pcapng value you need to give the name of your file (or the directory for the second case). and at the end the address you are running the receiving_service on.
@@ -93,7 +125,7 @@ where there is a lo.pcapng value you need to give the name of your file (or the 
 3. Or runnin a client service like client.go that was given in this repository in client folder by doing:
 
 ```
-...:~ go run client.go
+...:~$ go run client.go
 ```
 
 Step 7. Possible answers
@@ -114,7 +146,7 @@ could not save data
 
 3) If  the problem in pcap_statistics:
 ```
-could not makw statistics
+could not make statistics
 ```
 
 4) If there are error messages like:
@@ -124,3 +156,9 @@ INVALID_FILE
 It means that input data isn't correct. You should consider sending right file through right methods and the file size should not exceed 300mb.
 
 5) If you get some other errors it means that there is a problem in receiving_service.
+
+To stop the containers we use the command:
+
+```
+...:-$ sudo docker stop [container-name]
+```
