@@ -122,10 +122,10 @@ You can do it by:
 
 where there is a lo.pcapng value you need to give the name of your file (or the directory for the second case). and at the end the address you are running the receiving_service on.
 
-3. Or runnin a client service like client.go that was given in this repository in client folder by doing:
+3. Or runnin a client service like client.go that was given in this repository. Add lo.pcapng from test folder in this repository to client folder and run this:
 
 ```
-...:~$ go run client.go
+.../receiving_service/client:~$ go run client.go
 ```
 
 Step 7. Possible answers
