@@ -94,15 +94,15 @@ We use the command -pd to run the image in a detached mode and give it some para
 ```
 ...:~$ cd receiving_service
 
-.../receiving_service:~$ sudo docker run --name=rec --env-file .env -pd 8080:8080 receiver 
+.../receiving_service:~$ sudo docker run --name=rec --env-file .env -p 8080:8080 -d receiver 
 
 .../receiving_service:~$ cd ../pcap_statistics
 
-.../pcap_statistics:~ sudo docker run --name=stat --env-file .env -pd 6006:6006 receiver
+.../pcap_statistics:~ sudo docker run --name=stat --env-file .env -p 6006:6006 -d receiver
 
 .../pcap_statistics:~$ cd ../saving_service
 
-.../saving_service:~$ sudo docker run --name=save --env-file .env -pd 5005:5005 receiver
+.../saving_service:~$ sudo docker run --name=save --env-file .env -p 5005:5005 -d receiver
 ```
 
 8080:8080 part means that the host port 8080 should be connected to docker port 8080.
